@@ -151,9 +151,9 @@ async def play_command(ctx: lightbulb.context.Context):
         await musicPL.bot.update_voice_state(ctx.guild_id, channel_id, self_deaf=True)
         # await lavalink.create_new_node(ctx.guild_id)
         await ctx.respond(f"Joined: <#{channel_id}>")
-        inVC = True
+        # inVC = True
 
-    # inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
+    inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
 
     if inVC is not None:
 
@@ -461,21 +461,21 @@ async def shuffle_command(ctx: lightbulb.context.Context):
 # endregion
 
 
-# Change Volume
+# Change Volume (Disabled)
 # region VOLUME COMMAND
-@musicPL.command()
-@lightbulb.option(name="vol", description="Volume to set", required=True, min_value=1, max_value=500, type=int)
-@lightbulb.command(name="volume", description="Volume command", ephemeral=True)
-@lightbulb.implements(lightbulb.SlashCommand)
-async def volume_command(ctx: lightbulb.context.Context):
-    inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
-
-    if inVC is not None:
-        volume = ctx.options.vol
-        await lavalink.volume(ctx.guild_id, volume)
-        await ctx.respond(f"done set volume to {volume}%")
-    else:
-        await ctx.respond(content='Bot not in a VC')
+# @musicPL.command()
+# @lightbulb.option(name="vol", description="Volume to set", required=True, min_value=1, max_value=500, type=int)
+# @lightbulb.command(name="volume", description="Volume command", ephemeral=True)
+# @lightbulb.implements(lightbulb.SlashCommand)
+# async def volume_command(ctx: lightbulb.context.Context):
+#     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
+#
+#     if inVC is not None:
+#         volume = ctx.options.vol
+#         await lavalink.volume(ctx.guild_id, volume)
+#         await ctx.respond(f"done set volume to {volume}%")
+#     else:
+#         await ctx.respond(content='Bot not in a VC')
 # endregion
 
 

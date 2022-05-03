@@ -97,43 +97,44 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
     # Return the action rows from the function.
     return rows
 
-
-async def gen_vol(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
-    rows: t.List[ActionRowBuilder] = []
-
-    # Build the first action row
-    row = bot.rest.build_action_row()
-
-    # Here we iterate len(COLORS) times.
-
-    # buttons = ['Vol Down', 'Vol Up']
-    buttons = [{'label': 'Vol Down', 'emoji': hikari.Emoji.parse('🔻')}, {'label': 'Vol Up', 'emoji': hikari.Emoji.parse('🔺')}]
-
-    # emoiT = hikari.Emoji.parse(':small_red_triangle_down:')
-
-    for btn in buttons:
-        # print(btn)
-        (
-            # Adding the buttons into the action row.
-            row.add_button(
-                # Gray button style, see also PRIMARY, and DANGER.
-                hikari.ButtonStyle.SECONDARY,
-                # Set the buttons custom ID to the label.
-                btn['label'],
-            )
-            # set the emoji
-            .set_emoji(btn['emoji'])
-            # Set the actual label.
-            .set_label(btn['label'])
-            # Finally add the button to the container.
-            .add_to_container()
-        )
-
-    # Append the second action row to rows after the for loop.
-    rows.append(row)
-
-    # Return the action rows from the function.
-    return rows
+# region Vol Btns
+# async def gen_vol(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
+#     rows: t.List[ActionRowBuilder] = []
+#
+#     # Build the first action row
+#     row = bot.rest.build_action_row()
+#
+#     # Here we iterate len(COLORS) times.
+#
+#     # buttons = ['Vol Down', 'Vol Up']
+#     buttons = [{'label': 'Vol Down', 'emoji': hikari.Emoji.parse('🔻')}, {'label': 'Vol Up', 'emoji': hikari.Emoji.parse('🔺')}]
+#
+#     # emoiT = hikari.Emoji.parse(':small_red_triangle_down:')
+#
+#     for btn in buttons:
+#         # print(btn)
+#         (
+#             # Adding the buttons into the action row.
+#             row.add_button(
+#                 # Gray button style, see also PRIMARY, and DANGER.
+#                 hikari.ButtonStyle.SECONDARY,
+#                 # Set the buttons custom ID to the label.
+#                 btn['label'],
+#             )
+#             # set the emoji
+#             .set_emoji(btn['emoji'])
+#             # Set the actual label.
+#             .set_label(btn['label'])
+#             # Finally add the button to the container.
+#             .add_to_container()
+#         )
+#
+#     # Append the second action row to rows after the for loop.
+#     rows.append(row)
+#
+#     # Return the action rows from the function.
+#     return rows
+# endregion
 
 
 # region Base Create Queue
@@ -213,24 +214,24 @@ async def create_npMixer(ctx: lightbulb.Context) -> None:
 
 # region Base Volume
 
-async def create_volMixer(ctx: lightbulb.context.Context) -> None:
-    rows = await gen_vol(ctx.bot)
-    embedTitle = 'Overall Volume'
-    embedDescription = ''
-    inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
-
-    level = await lavalink.get_guild_node(ctx.guild_id)
-    if level is not None:
-        print(level.volume)
-        level = 100
-
-    # print(level)
-
-    embedDescription = '0% <---------|> 100%'
-
-    await mixerPL.bot.rest.create_message(ctx.channel_id,
-                                          embed=hikari.Embed(title=embedTitle, description=embedDescription),
-                                          components=rows)
+# async def create_volMixer(ctx: lightbulb.context.Context) -> None:
+#     rows = await gen_vol(ctx.bot)
+#     embedTitle = 'Overall Volume'
+#     embedDescription = ''
+#     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
+#
+#     level = await lavalink.get_guild_node(ctx.guild_id)
+#     if level is not None:
+#         print(level.volume)
+#         level = 100
+#
+#     # print(level)
+#
+#     embedDescription = '0% <---------|> 100%'
+#
+#     await mixerPL.bot.rest.create_message(ctx.channel_id,
+#                                           embed=hikari.Embed(title=embedTitle, description=embedDescription),
+#                                           components=rows)
 
 # endregion
 
@@ -241,11 +242,9 @@ async def create_volMixer(ctx: lightbulb.context.Context) -> None:
 async def create_mixer(ctx: lightbulb.context.Context) -> None:
     await create_npMixer(ctx)
     await create_queueMixer(ctx)
-    await create_volMixer(ctx)
+    # await create_volMixer(ctx)
 
     await ctx.respond(content='Created Mixer', flags=hikari.MessageFlag.EPHEMERAL)
-
-
 
 
 def load(bot: lightbulb.BotApp):

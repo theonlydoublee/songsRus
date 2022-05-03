@@ -23,8 +23,6 @@ def create_bot() -> lightbulb.BotApp:
         help_slash_command=True,
     )
 
-    # bot.reload_extensions('TestBot.Music.Commands')
-
     # bot.load_extensions_from("./TestBot/Commands")
     # bot.load_extensions_from("./TestBot/Tasks")
     # bot.load_extensions_from("./TestBot/Listeners")

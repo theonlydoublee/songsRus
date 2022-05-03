@@ -5,6 +5,8 @@ import lightbulb
 from musicBot.Music.musicCommands import lavalink
 from hikari.api import ActionRowBuilder
 
+from musicBot.Libs import readWrite
+
 mixerPL = lightbulb.Plugin('mixerPL')
 
 # ▶️- Play
@@ -43,12 +45,12 @@ async def gen_queue(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
                 # Set the buttons custom ID to the label.
                 btn['label'],
             )
-            # set emoji
-            .set_emoji(btn['emoji'])
-            # Set the actual label.
-            .set_label(btn['label'])
-            # Finally add the button to the container.
-            .add_to_container()
+                # set emoji
+                .set_emoji(btn['emoji'])
+                # Set the actual label.
+                .set_label(btn['label'])
+                # Finally add the button to the container.
+                .add_to_container()
         )
 
     # Append the second action row to rows after the for loop.
@@ -68,11 +70,11 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
 
     # buttons = ['Pause', 'Resume', 'Skip', 'Repeat']
     buttons = [
-               {'label': 'Pause', 'emoji': hikari.Emoji.parse('⏸️')},
-               {'label': 'Play', 'emoji': hikari.Emoji.parse('▶️')},
-               {'label': 'Skip', 'emoji': hikari.Emoji.parse('⏭️')},
-               {'label': 'Repeat Song', 'emoji': hikari.Emoji.parse('🔂')},
-               ]
+        {'label': 'Pause', 'emoji': hikari.Emoji.parse('⏸️')},
+        {'label': 'Play', 'emoji': hikari.Emoji.parse('▶️')},
+        {'label': 'Skip', 'emoji': hikari.Emoji.parse('⏭️')},
+        {'label': 'Repeat Song', 'emoji': hikari.Emoji.parse('🔂')},
+    ]
 
     for btn in buttons:
 
@@ -91,12 +93,12 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
                 # Set the buttons custom ID to the label.
                 btn['label'],
             )
-            # set emoji
-            .set_emoji(btn['emoji'])
-            # Set the actual label.
-            .set_label(btn['label'])
-            # Finally add the button to the container.
-            .add_to_container()
+                # set emoji
+                .set_emoji(btn['emoji'])
+                # Set the actual label.
+                .set_label(btn['label'])
+                # Finally add the button to the container.
+                .add_to_container()
         )
 
     # Append the second action row to rows after the for loop.
@@ -104,6 +106,7 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
 
     # Return the action rows from the function.
     return rows
+
 
 # region Vol Btns
 # async def gen_vol(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
@@ -149,8 +152,7 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
 # @mixerPL.command()
 # @lightbulb.command("mixerQueue", "Base queue for mixer")
 # @lightbulb.implements(lightbulb.SlashCommand)
-async def create_queueMixer(ctx: lightbulb.Context) -> None:
-
+async def create_queueMixer(ctx: lightbulb.Context):
     # Generate the action rows.
     rows = await gen_queue(ctx.bot)
 
@@ -177,24 +179,25 @@ async def create_queueMixer(ctx: lightbulb.Context) -> None:
         #     [f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}"
         #         for n, i in enumerate(node.queue)])
 
-        await mixerPL.bot.rest.create_message(ctx.channel_id,
-                                              embed=hikari.Embed(title=embedTitle, description=embedDescription),
-                                              components=rows)
+        return await mixerPL.bot.rest.create_message(ctx.channel_id,
+                                                     embed=hikari.Embed(title=embedTitle, description=embedDescription),
+                                                     components=rows)
 
     else:
         # queEmbed.title = 'Queue'
         embedDescription = 'Not in VC'
-        await mixerPL.bot.rest.create_message(ctx.channel_id,
-                                              embed=hikari.Embed(title=embedTitle, description=embedDescription),
-                                              components=rows)
+        return await mixerPL.bot.rest.create_message(ctx.channel_id,
+                                                     embed=hikari.Embed(title=embedTitle, description=embedDescription),
+                                                     components=rows)
 
     # await ctx.respond(content="Created Queue Message", delete_after=0)
+
 
 # endregion
 
 
 # region Base Now Playing
-async def create_npMixer(ctx: lightbulb.Context) -> None:
+async def create_npMixer(ctx: lightbulb.Context):
     rows = await gen_np(ctx.bot)
     embedTitle = 'Now Playing'
     embedDescription = ''
@@ -216,9 +219,11 @@ async def create_npMixer(ctx: lightbulb.Context) -> None:
     else:
         embedDescription = 'Not in a VC'
 
-    await mixerPL.bot.rest.create_message(ctx.channel_id,
-                                          embed=hikari.Embed(title=embedTitle, description=embedDescription),
-                                          components=rows)
+    return await mixerPL.bot.rest.create_message(ctx.channel_id,
+                                                 embed=hikari.Embed(title=embedTitle, description=embedDescription),
+                                                 components=rows)
+
+
 # endregion
 
 
@@ -245,16 +250,23 @@ async def create_npMixer(ctx: lightbulb.Context) -> None:
 
 # endregion
 
-
 @mixerPL.command()
 @lightbulb.command('createmixer', 'Create messages in mixer channel')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def create_mixer(ctx: lightbulb.context.Context) -> None:
-    await create_npMixer(ctx)
-    await create_queueMixer(ctx)
+    msgNp = await create_npMixer(ctx)
+    msgNpID = msgNp.id
+    msgQueue = await create_queueMixer(ctx)
+    msgQueueID = msgQueue.id
+
+    readWrite.setGuildFile(ctx.guild_id, msgNpID, msgQueueID, ctx.channel_id)
+
     # await create_volMixer(ctx)
 
-    await ctx.respond(content='Created Mixer', flags=hikari.MessageFlag.EPHEMERAL)
+    await ctx.respond(content='Created Mixer',
+                      # flags=hikari.MessageFlag.EPHEMERAL,
+                      delete_after=0
+                      )
 
 
 def load(bot: lightbulb.BotApp):

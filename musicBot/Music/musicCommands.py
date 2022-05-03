@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 from spotipy.oauth2 import SpotifyClientCredentials
 import lightbulb, hikari, lavaplayer, logging
 
+from musicBot.Libs import readWrite, updateMsgs
+
 # the lavalink.jar needs to be run with Java 11 (LTS) or newer
 # in main file, import the file and do lavalink.connect() before bot.run()
 # from TestBot.Music.Commands import *
@@ -31,6 +33,17 @@ async def track_start_event(event: lavaplayer.TrackStartEvent):
 @lavalink.listen(lavaplayer.TrackEndEvent)
 async def track_end_event(event: lavaplayer.TrackEndEvent):
     # await musicPL.bot.application.
+
+    mixer = readWrite.readGuildFile(event.guild_id)
+    msgNpID = mixer["msgNpID"]
+    msgQueueID = mixer["msgQueueID"]
+    channelID = mixer["channelID"]
+
+    try:
+        await musicPL.bot.rest.edit_message(channelID, msgNpID, embed=hikari.Embed(title="New Title NP", description="New Description NP"))
+        await musicPL.bot.rest.edit_message(channelID, msgQueueID, embed=hikari.Embed(title="New Title Q", description="New Description Q"))
+    except:
+        print('Add no msg logic')
 
     # if repeat queue is on, add song to queue
     logging.info(f"track end: {event.track.title}")
@@ -139,6 +152,8 @@ async def play_command(ctx: lightbulb.context.Context):
     #     await lavalink.create_new_node(ctx.guild_id)
 
     # print(lavalink.nodes)
+
+
 
     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
 

@@ -35,8 +35,6 @@ def create_bot() -> lightbulb.BotApp:
 
 
 if __name__ == "__main__":
-    from musicBot.Libs import readWrite
-    readWrite.setGuildFile(1,2,3,4)
-    # print("USING MAIN")
-    # lavalink.connect()
-    # create_bot().run()
+    print("USING MAIN")
+    lavalink.connect()
+    create_bot().run()

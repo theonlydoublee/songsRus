@@ -20,11 +20,11 @@ async def on_component_interaction(event: hikari.InteractionCreateEvent) -> None
     guild = await event.interaction.app.rest.fetch_guild(guildID)
     # test.get_voice_state()
 
-    inVC = guild.get_voice_state(event.interaction.guild_id)  # , btnMixer.bot.get_me()
+    # inVC = guild.get_voice_state(event.interaction.guild_id)  # , btnMixer.bot.get_me()
     inVC = guild.get_voice_state(btnMixer.bot.get_me())  # , btnMixer.bot.get_me()
     # testB = event.app.
 
-    print(inVC)
+    # print(inVC)
 
     if inVC is not None:
         node = await lavalink.get_guild_node(guildID)
@@ -107,88 +107,3 @@ def load(bot: lightbulb.BotApp):
 
 def unload(bot: lightbulb.BotApp):
     bot.remove_plugin(btnMixer)
-
-
-# ROLES = [{"rolename": "Test 1", "roleid": 966826632448999464},
-    #          {"rolename": "Test 2", "roleid": 966826674257797260},
-    #          {"rolename": "Test 3", "roleid": 966826707724173323},
-    #          ]
-    # guildID = event.interaction.guild_id
-    #
-    # member = event.interaction.member
-    #
-    # memRoles = member.get_roles()
-    # btnID = event.interaction.custom_id
-    #
-    # memRoleIDS = []
-    #
-    # for role in memRoles:
-    #     memRoleIDS.append(role.id)
-    #
-    # print('\n')
-    # for role in ROLES:
-    #     print(f"{role['rolename'] == btnID}")
-    #
-    #     if role["rolename"] == btnID:
-    #         await btnRoleListPL.bot.rest.add_role_to_member(guildID, member.user.id, role["roleid"])
-    #         await event.interaction.create_initial_response(
-    #             hikari.ResponseType.MESSAGE_CREATE,  # Create a new message as response to this interaction
-    #             f"Set State to {btnID} {member.user.username}#{member.user.discriminator}",
-    #             # Message content
-    #             flags=hikari.MessageFlag.EPHEMERAL  # Ephemeral message, only visible to the user who pressed the button
-    #         )
-    #     else:
-    #         await btnRoleListPL.bot.rest.remove_role_from_member(guildID, member.user.id, role["roleid"])
-    #         # await event.interaction.create_initial_response(
-    #         #     hikari.ResponseType.MESSAGE_CREATE,  # Create a new message as response to this interaction
-    #         #     f"Added role {role['rolename']} to {member.user.username}#{member.user.discriminator}",
-    #         #     # Message content
-    #         #     flags=hikari.MessageFlag.EPHEMERAL  # Ephemeral message, only visible to the user who pressed the button
-    #         # )
-    #
-    #
-    # # print(btnID)
-    # # if btnID == 'Test 1':
-    # #     # print(messageID)
-    # #
-    # #     guildID = event.interaction.guild_id
-    # #
-    # #     member = event.interaction.member
-    # #
-    # #     memRoles = member.get_roles()
-    # #     roleIDs = []
-    # #     for role in memRoles:
-    # #         roleIDs.append(role.id)
-    # #
-    # #     if 966826632448999464 in roleIDs:
-    # #         # await btnRolePL.bot.rest.add_role_to_member(event.interaction.guild_id, member.user.id, 966826632448999464)
-    # #         await btnRoleListPL.bot.rest.remove_role_from_member(guildID, member.user.id, 966826632448999464)
-    # #         await event.interaction.create_initial_response(
-    # #             hikari.ResponseType.MESSAGE_CREATE,  # Create a new message as response to this interaction
-    # #             f"Removed role Test 1 to {member.user.username}#{member.user.discriminator}",
-    # #             # Message content
-    # #             flags=hikari.MessageFlag.EPHEMERAL  # Ephemeral message, only visible to the user who pressed the button
-    # #         )
-    # #     else:
-    # #         await btnRoleListPL.bot.rest.add_role_to_member(guildID, member.user.id, 966826632448999464)
-    # #         await event.interaction.create_initial_response(
-    # #             hikari.ResponseType.MESSAGE_CREATE,  # Create a new message as response to this interaction
-    # #             f"Added role Test 1 to {member.user.username}#{member.user.discriminator}",
-    # #             # Message content
-    # #             flags=hikari.MessageFlag.EPHEMERAL  # Ephemeral message, only visible to the user who pressed the button
-    # #         )
-    # #
-    # #     # btnRolePL.bot.rest.create
-    #
-    #
-    # # await plugin.bot.rest.edit_message(966725529652834314, 969061172169035836, content=f"{member.user.username}#{member.user.discriminator} Clicked a button: {event.interaction.custom_id}")
-    #
-    # # print(event.interaction)
-    # # print(f"{member.user.username}#{member.user.discriminator}")
-    #
-    # # if event.interaction.custom_id == "White":
-    # # await event.interaction.create_initial_response(
-    # #     hikari.ResponseType.MESSAGE_CREATE,  # Create a new message as response to this interaction
-    # #     f"{member.user.username}#{member.user.discriminator} Clicked a button: {event.interaction.custom_id}",  # Message content
-    # #     flags=hikari.MessageFlag.EPHEMERAL  # Ephemeral message, only visible to the user who pressed the button
-    # # )

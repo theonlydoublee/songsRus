@@ -98,6 +98,8 @@ async def cmd_join(ctx: lightbulb.context.Context):
 @lightbulb.command(name="leave", description="Leave command")
 @lightbulb.implements(lightbulb.SlashCommand)
 async def leave_command(ctx: lightbulb.context.Context):
+    # ctx.bot.cache
+
     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
     # node = await lavalink.get_guild_node(ctx.guild_id)
     if inVC is not None:
@@ -309,11 +311,11 @@ async def queue_command(ctx: lightbulb.context.Context):
         embedDescription = ''
         for n, i in fullQueue:
             if n > 0:
-                if n < 10:
-                    embedDescription += f"{n}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}\n"
+                if n < 11:
+                    embedDescription += f"**{n}** - [{i.title}]({i.uri}) \n\u1CBC\u1CBC Requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}\n\u1CBC\u1CBC\n"
                 else:
                     break
-        embed = hikari.Embed(title='Queue - Next',
+        embed = hikari.Embed(title='Queue - Next 10',
                              description=embedDescription
                              # description="\n".join(
                              #     [f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}" for n, i in enumerate(node.queue)])

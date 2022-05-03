@@ -23,10 +23,10 @@ def create_bot() -> lightbulb.BotApp:
         help_slash_command=True,
     )
 
-    # bot.load_extensions_from("./TestBot/Commands")
-    # bot.load_extensions_from("./TestBot/Tasks")
-    # bot.load_extensions_from("./TestBot/Listeners")
-    # bot.load_extensions_from("./TestBot/ButtonRoles")
+    # bot.load_extensions_from("./musicBot/Commands")
+    # bot.load_extensions_from("./musicBot/Tasks")
+    bot.load_extensions_from("./musicBot/Listeners")
+    # bot.load_extensions_from("./musicBot/ButtonRoles")
     bot.load_extensions_from("./musicBot/Music")
 
     # Loads tasks and autostart tasks will start

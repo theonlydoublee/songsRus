@@ -70,11 +70,19 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
     buttons = [
                {'label': 'Pause', 'emoji': hikari.Emoji.parse('⏸️')},
                {'label': 'Play', 'emoji': hikari.Emoji.parse('▶️')},
-               {'label': 'Skip Single', 'emoji': hikari.Emoji.parse('⏭️')},
+               {'label': 'Skip', 'emoji': hikari.Emoji.parse('⏭️')},
                {'label': 'Repeat Song', 'emoji': hikari.Emoji.parse('🔂')},
                ]
 
     for btn in buttons:
+
+        if buttons.index(btn) == 2:  # and buttons.index(btn) != 0
+            # If i is evenly divided by 4, and not 0 we want to
+            # append the first row to rows and build the second
+            # action row. (Gives a more even button layout)
+            rows.append(row)
+            row = bot.rest.build_action_row()
+
         (
             # Adding the buttons into the action row.
             row.add_button(
@@ -159,10 +167,11 @@ async def create_queueMixer(ctx: lightbulb.Context) -> None:
 
         embedDescription = ''
         for n, i in enumerate(node.queue):
-            if n < 5:
-                embedDescription += f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}\n"
-            else:
-                break
+            if n > 0:
+                if n < 6:
+                    embedDescription += f"**{n}** - [{i.title}]({i.uri}) \n\u1CBC\u1CBC Requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}\n\u1CBC\u1CBC\n"
+                else:
+                    break
 
         # embedDescription = "\n".join(
         #     [f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}"
@@ -197,7 +206,8 @@ async def create_npMixer(ctx: lightbulb.Context) -> None:
             embedDescription = "Nothing Currently Playing"
         else:
 
-            embedDescription = f"{node.queue[0].title} by {node.queue[0].author}"
+            # embedDescription = f"{node.queue[0].title} by {node.queue[0].author}"
+            embedDescription = f"[{node.queue[0].title}]({node.queue[0].uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(node.queue[0].requester)).mention}\n"
 
             # await ctx.respond(f"{node.queue[0].title} by {node.queue[0].author}")
             # await mixerPL.bot.rest.create_message(ctx.channel_id,

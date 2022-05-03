@@ -251,7 +251,7 @@ async def play_command(ctx: lightbulb.context.Context):
                 auth_manager=SpotifyClientCredentials(client_id=SPOTCLIENT_ID, client_secret=SPOTCLIENT_SECRET))
             track_link = f"{query}"
             track_id = track_link.split("/")[-1].split("?")[0]
-            print(track_id)
+            # print(track_id)
             track = f"spotify:track:{track_id}"
             spotifytrack = sp.track(track)
             trackname = spotifytrack['name'] + " " + spotifytrack["artists"][0]["name"]

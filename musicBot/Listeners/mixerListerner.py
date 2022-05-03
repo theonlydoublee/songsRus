@@ -49,7 +49,7 @@ async def on_component_interaction(event: hikari.InteractionCreateEvent) -> None
             case 'Skip':
                 print('Skip')
                 stats = False if node.repeat else True
-                print(stats)
+                # print(stats)
                 if stats:
                     await lavalink.repeat(guildID, False)
                 await lavalink.skip(guildID)

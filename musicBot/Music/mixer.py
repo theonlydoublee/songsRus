@@ -1,13 +1,15 @@
 import typing as t
+from asyncio import sleep
 
 import hikari
 import lightbulb
 from musicBot.Music.musicCommands import lavalink
 from hikari.api import ActionRowBuilder
 
-from musicBot.Libs import readWrite
+from musicBot.Libs import readWrite  # , updateMsgs
 
 mixerPL = lightbulb.Plugin('mixerPL')
+
 
 # ▶️- Play
 # ⏸️- Pause
@@ -31,12 +33,20 @@ async def gen_queue(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
 
     # buttons = ['Loop Queue', 'Clear Queue']
     buttons = [
-        {'label': 'Loop Queue', 'emoji': hikari.Emoji.parse('🔁')},
+        {'label': 'Repeat Queue', 'emoji': hikari.Emoji.parse('🔁')},
         {'label': 'Shuffle', 'emoji': hikari.Emoji.parse('🔀')},
-        {'label': 'Clear', 'emoji': hikari.Emoji.parse('⏹️')},
+        {'label': 'Stop Music', 'emoji': hikari.Emoji.parse('⏹️')},
     ]
 
     for btn in buttons:
+
+        if buttons.index(btn) == 2:  # and buttons.index(btn) != 0
+            # If i is evenly divided by 4, and not 0 we want to
+            # append the first row to rows and build the second
+            # action row. (Gives a more even button layout)
+            rows.append(row)
+            row = bot.rest.build_action_row()
+
         (
             # Adding the buttons into the action row.
             row.add_button(
@@ -152,44 +162,56 @@ async def gen_np(bot: lightbulb.BotApp) -> t.Iterable[ActionRowBuilder]:
 # @mixerPL.command()
 # @lightbulb.command("mixerQueue", "Base queue for mixer")
 # @lightbulb.implements(lightbulb.SlashCommand)
-async def create_queueMixer(ctx: lightbulb.Context):
+async def create_queueMixer(guildID, update=False, channelID=0):
     # Generate the action rows.
-    rows = await gen_queue(ctx.bot)
+    # rows = await gen_queue(ctx.bot)
+    rows = await gen_queue(mixerPL.bot)
 
     # Send the initial response with our action rows, and save the
 
     # await btnRoles.bot.rest.create_message(ctx.channel_id, embed=hikari.Embed(title="Pick a color"), components=rows)
 
     # queEmbed = hikari.Embed
-    embedTitle = 'Queue - Next 5'
-    inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
+    embedTitle = 'Next 5 Songs'
+    # inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
+    guild = await mixerPL.bot.rest.fetch_guild(guildID)
+
+    inVC = mixerPL.bot.cache.get_voice_state(guildID, mixerPL.bot.cache.get_me())
 
     if inVC is not None:
-        node = await lavalink.get_guild_node(ctx.guild_id)
+        node = await lavalink.get_guild_node(guildID)
 
         embedDescription = ''
         for n, i in enumerate(node.queue):
             if n > 0:
                 if n < 6:
-                    embedDescription += f"**{n}** - [{i.title}]({i.uri}) \n\u1CBC\u1CBC Requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}\n\u1CBC\u1CBC\n"
+                    embedDescription += f"**{n}** - [{i.title}]({i.uri}) \n\u1CBC\u1CBC Requested by: {hikari.Guild.get_member(guild, int(i.requester)).mention}\n\u1CBC\u1CBC\n"
                 else:
                     break
+
+        if embedDescription == '':
+            embedDescription = 'Queue Is Empty'
 
         # embedDescription = "\n".join(
         #     [f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}"
         #         for n, i in enumerate(node.queue)])
 
-        return await mixerPL.bot.rest.create_message(ctx.channel_id,
+        if update:
+            return hikari.Embed(title=embedTitle, description=embedDescription)
+
+        return await mixerPL.bot.rest.create_message(channelID,
                                                      embed=hikari.Embed(title=embedTitle, description=embedDescription),
                                                      components=rows)
-
+        # return hikari.Embed(title=embedTitle, description=embedDescription)
     else:
         # queEmbed.title = 'Queue'
         embedDescription = 'Not in VC'
-        return await mixerPL.bot.rest.create_message(ctx.channel_id,
+        if update:
+            return hikari.Embed(title=embedTitle, description=embedDescription)
+        return await mixerPL.bot.rest.create_message(channelID,
                                                      embed=hikari.Embed(title=embedTitle, description=embedDescription),
                                                      components=rows)
-
+        # return hikari.Embed(title=embedTitle, description=embedDescription)
     # await ctx.respond(content="Created Queue Message", delete_after=0)
 
 
@@ -197,20 +219,24 @@ async def create_queueMixer(ctx: lightbulb.Context):
 
 
 # region Base Now Playing
-async def create_npMixer(ctx: lightbulb.Context):
-    rows = await gen_np(ctx.bot)
+async def create_npMixer(guildID, update=False):
+    rows = await gen_np(mixerPL.bot)
     embedTitle = 'Now Playing'
     embedDescription = ''
-    inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
 
+    # guild = await event.interaction.app.rest.fetch_guild(guildID)
+    guild = await mixerPL.bot.rest.fetch_guild(guildID)
+
+    # inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, mixerPL.bot.cache.get_me())
+    inVC = guild.get_voice_state(mixerPL.bot.get_me())
     if inVC is not None:
-        node = await lavalink.get_guild_node(ctx.guild_id)
+        node = await lavalink.get_guild_node(guildID)
         if not node.queue:
             embedDescription = "Nothing Currently Playing"
         else:
 
             # embedDescription = f"{node.queue[0].title} by {node.queue[0].author}"
-            embedDescription = f"[{node.queue[0].title}]({node.queue[0].uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(node.queue[0].requester)).mention}\n"
+            embedDescription = f"[{node.queue[0].title}]({node.queue[0].uri}) requested by: {hikari.Guild.get_member(guild, int(node.queue[0].requester)).mention}\n"
 
             # await ctx.respond(f"{node.queue[0].title} by {node.queue[0].author}")
             # await mixerPL.bot.rest.create_message(ctx.channel_id,
@@ -219,12 +245,58 @@ async def create_npMixer(ctx: lightbulb.Context):
     else:
         embedDescription = 'Not in a VC'
 
-    return await mixerPL.bot.rest.create_message(ctx.channel_id,
+    guildItems = readWrite.readGuildFile(guildID)
+    channelID = guildItems["channelID"]
+    if update:
+        return hikari.Embed(title=embedTitle, description=embedDescription)
+    return await mixerPL.bot.rest.create_message(channelID,
                                                  embed=hikari.Embed(title=embedTitle, description=embedDescription),
                                                  components=rows)
 
 
 # endregion
+
+
+async def msgUpdate(guildID):
+    # print('Add logic to update messages')
+
+    mixer = readWrite.readGuildFile(guildID)
+    msgNpID = mixer["msgNpID"]
+    msgQueueID = mixer["msgQueueID"]
+    channelID = mixer["channelID"]
+    try:
+
+        node = await lavalink.get_guild_node(guildID)
+        queue = node.queue
+
+        if queue is not None:
+
+            rows = await gen_np(mixerPL.bot)
+            # print(await create_npMixer(guildID))
+            await mixerPL.bot.rest.edit_message(channelID, msgNpID,
+                                                embed=await create_npMixer(guildID, True),
+                                                # embed=hikari.Embed(title="New Title Q", description="New Description Q"),
+                                                components=rows,
+                                                )
+
+            # await musicPL.bot.rest.edit_message(channelID, msgNpID,
+            #                                     embed=create_npMixer())
+
+            rows = await gen_queue(mixerPL.bot)
+            print('updating')
+            await mixerPL.bot.rest.edit_message(channelID, msgQueueID,
+                                                # embed=hikari.Embed(title="New Title Q", description="New Description Q"),
+                                                embed=await create_queueMixer(guildID, True),
+                                                components=rows,
+                                                )
+
+    except Exception as e:
+        print(e)
+        print('Add no msg logic')
+        await sleep(20)
+        # await msgUpdate(guildID)
+
+        # maybe "Respond with please run /createmixer"
 
 
 # region Base Volume
@@ -254,12 +326,16 @@ async def create_npMixer(ctx: lightbulb.Context):
 @lightbulb.command('createmixer', 'Create messages in mixer channel')
 @lightbulb.implements(lightbulb.SlashCommand)
 async def create_mixer(ctx: lightbulb.context.Context) -> None:
-    msgNp = await create_npMixer(ctx)
+    msgNp = await create_npMixer(ctx.guild_id)
     msgNpID = msgNp.id
-    msgQueue = await create_queueMixer(ctx)
+    # msgQueue = await create_queueMixer(ctx)
+    msgQueue = await create_queueMixer(ctx.guild_id, channelID=ctx.channel_id)
+
     msgQueueID = msgQueue.id
 
     readWrite.setGuildFile(ctx.guild_id, msgNpID, msgQueueID, ctx.channel_id)
+
+    await msgUpdate(ctx.guild_id)
 
     # await create_volMixer(ctx)
 

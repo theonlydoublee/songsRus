@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+
 # C extensions
 *.so
 
@@ -112,3 +113,8 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.idea/
+/musicBot/Music/lavalink/logs/
+/musicBot/Music/purge.py
+musicBot/Music/purge.py

@@ -1,5 +1,3 @@
-import asyncio
-
 import lightbulb, hikari
 
 plugin = lightbulb.Plugin("plugin", include_datastore=True)

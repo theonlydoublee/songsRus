@@ -10,7 +10,6 @@ import lightbulb, hikari, lavaplayer, logging
 
 # the lavalink.jar needs to be run with Java 11 (LTS) or newer
 # in main file, import the file and do lavalink.connect() before bot.run()
-# from TestBot.Music.Commands import *
 lavalink = lavaplayer.LavalinkClient(
     host="localhost",  # Lavalink host
     port=2333,  # Lavalink port
@@ -28,37 +27,31 @@ loopQueue = False
 
 
 # region DEBUG/Event LOGS
+# Ignore Expected type error in @lavalink.listen()
 @lavalink.listen(lavaplayer.TrackStartEvent)
 async def track_start_event(event: lavaplayer.TrackStartEvent):
-
-    # await updateMsgs.msgUpdate(musicPL, event.guild_id)
-
-    # from musicBot.Music.mixer import msgUpdate
-    # from musicBot.Music.mixer import msgUpdate
-    # await msgUpdate(event.guild_id)
 
     logging.info(f"start track: {event.track.title}")
 
 
 @lavalink.listen(lavaplayer.TrackEndEvent)
 async def track_end_event(event: lavaplayer.TrackEndEvent):
-    # await musicPL.bot.application.
-
-    # updateMsgs.msgUpdate(musicPL, event.guild_id)
     from musicBot.Music.mixer import msgUpdate
     await msgUpdate(event.guild_id)
     # if repeat queue is on, add song to queue
-    logging.info(f"track end: {event.track.title}")
-    node = lavalink.get_guild_node(event.guild_id)
-
-    if loopQueue:
-        print('Added song to end of queue')
-        await lavalink.play(event.guild_id, track=event.track)
+    # not implemented yet
+    # logging.info(f"track end: {event.track.title}")
+    # node = lavalink.get_guild_node(event.guild_id)
+    #
+    # if loopQueue:
+    #     print('Added song to end of queue')
+    #     await lavalink.play(event.guild_id, track=event.track)
 
 
 @lavalink.listen(lavaplayer.WebSocketClosedEvent)
 async def web_socket_closed_event(event: lavaplayer.WebSocketClosedEvent):
     logging.error(f"error with websocket {event.reason}")
+
 # endregion
 
 
@@ -78,20 +71,6 @@ async def cmd_music(ctx: lightbulb.context):
 @lightbulb.command(name="join", description="join voice channel", aliases=["connect"])
 @lightbulb.implements(lightbulb.SlashCommand)
 async def cmd_join(ctx: lightbulb.context.Context):
-    # if lavalink.nodes
-
-    # test = lavalink.nodes
-    # if len(test) > 0:
-    #     for x in test:
-    #         if x != ctx.guild_id:
-    #             print('creating node')
-    #             await lavalink.create_new_node(ctx.guild_id)
-    #         print(x)
-    # else:
-    #     print('creating node')
-    #     await lavalink.create_new_node(ctx.guild_id)
-
-    # print(lavalink.nodes)
 
     states = musicPL.bot.cache.get_voice_states_view_for_guild(ctx.guild_id)
     voice_state = [state async for state in states.iterator().filter(lambda i: i.user_id == ctx.author.id)]
@@ -105,7 +84,6 @@ async def cmd_join(ctx: lightbulb.context.Context):
 
     # 5% chance to play rickroll on join
     if random.random() < 0.05:
-
         await lavalink.play(ctx.guild_id, (await lavalink.auto_search_tracks('Rick Astley - Never Gonna Give You Up (Official Music Video)'))[0], requester=1234)
 
 
@@ -118,22 +96,16 @@ async def cmd_join(ctx: lightbulb.context.Context):
 @lightbulb.command(name="leave", description="Leave command", aliases=["disconnect"])
 @lightbulb.implements(lightbulb.SlashCommand)
 async def leave_command(ctx: lightbulb.context.Context):
-    # ctx.bot.cache
 
     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
-    # node = await lavalink.get_guild_node(ctx.guild_id)
     if inVC is not None:
         # try:
         # stop music
         queue = await lavalink.queue(ctx.guild_id)
         if len(queue) > 0:
             await lavalink.stop(ctx.guild_id)
-            # await lavalink.destroy(ctx.guild_id)
         await musicPL.bot.update_voice_state(ctx.guild_id, None)
         await ctx.respond("Left the voice channel", flags=hikari.MessageFlag.EPHEMERAL)
-        # except:
-        #     await musicPL.bot.update_voice_state(ctx.guild_id, None)
-        #     await ctx.respond("Left the voice channel", flags=hikari.MessageFlag.EPHEMERAL)
 
     else:
         await ctx.respond(content='Bot not in a VC', flags=hikari.MessageFlag.EPHEMERAL)
@@ -148,18 +120,6 @@ async def leave_command(ctx: lightbulb.context.Context):
 @lightbulb.command(name="play", description="Play command", aliases=["p", "add"])
 @lightbulb.implements(lightbulb.SlashCommand)
 async def play_command(ctx: lightbulb.context.Context):
-    # test = lavalink.nodes
-    # if len(test) > 0:
-    #     for x in test:
-    #         if x != ctx.guild_id:
-    #             print('creating node')
-    #             await lavalink.create_new_node(ctx.guild_id)
-    #         print(x)
-    # else:
-    #     print('creating node')
-    #     await lavalink.create_new_node(ctx.guild_id)
-
-    # print(lavalink.nodes)
 
     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
 
@@ -172,9 +132,7 @@ async def play_command(ctx: lightbulb.context.Context):
             return
         channel_id = voice_state[0].channel_id
         await musicPL.bot.update_voice_state(ctx.guild_id, channel_id, self_deaf=True)
-        # await lavalink.create_new_node(ctx.guild_id)
         await ctx.respond(f"Joined: <#{channel_id}>", flags=hikari.MessageFlag.EPHEMERAL)
-        # inVC = True
 
     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
 
@@ -205,9 +163,6 @@ async def play_command(ctx: lightbulb.context.Context):
                 queryfinal = f"{track_name} " + " " + f"{track_artist}"
                 result = f"ytmsearch:{queryfinal}"
                 query_information = await lavalink.get_tracks(result)
-                # print(result)
-                # print(query_information)
-                # print(f"Song: {query_information[0]}")
                 try:
                     await lavalink.play(ctx.guild_id, query_information[0], ctx.author.id)
                     i += 1
@@ -222,8 +177,6 @@ async def play_command(ctx: lightbulb.context.Context):
             embed = hikari.Embed(title="Added the Playlist to Queue",
                                  description='Finished Loading Songs',
                                  color=0x6100FF, timestamp=datetime.datetime.now().astimezone())
-            # await musicPL.bot.rest.create_message(ctx.channel_id, embed=embed)
-            # await msg.delete()
             await ctx.respond(embed=embed, delete_after=10)
             return
 
@@ -260,8 +213,6 @@ async def play_command(ctx: lightbulb.context.Context):
 
             embed = hikari.Embed(title="Added the Album to Queue", description=f"Finished Loading Album",
                                  color=0x6100FF, timestamp=datetime.datetime.now().astimezone())
-            # await musicPL.bot.rest.create_message(ctx.channel_id, embed=embed)
-            # await msg.delete()
             await ctx.respond(embed=embed, delete_after=10)
 
             return
@@ -277,29 +228,23 @@ async def play_command(ctx: lightbulb.context.Context):
             trackname = spotifytrack['name'] + " " + spotifytrack["artists"][0]["name"]
             result = f"ytmsearch:{trackname}"
             query_information = await lavalink.get_tracks(result)
-            # await musicPL.d.lavalink.play(ctx.guild_id, query_information.tracks[0]).requester(ctx.author.id).queue()
             await lavalink.play(ctx.guild_id, query_information[0], ctx.author.id)
             await ctx.respond(content=f'Song added: {trackname}', delete_after=10)
-            # embed = hikari.Embed(title="Added Song To The Queue", color=0x6100FF)
-            # # await musicPL.bot.rest.delete_m
-            # await musicPL.bot.rest.create_message(ctx.channel_id, embed=embed)
 
             await msgUpdate(ctx.guild_id)
             return
 
         # region Default Search
         result = await lavalink.auto_search_tracks(f"{query}")  # search for the query
-        # result = await lavalink.auto_search_tracks(f"https://www.twitch.tv/giantwaffle")  # search for the query
+        # result = await lavalink.auto_search_tracks(f"https://www.twitch.tv/giantwaffle")  # Test hardcode search for twitch for the query
         if not result:
             await ctx.respond("No results found for your query", delete_after=10)
 
-            # await msgUpdate(ctx.guild_id)
             return
 
         # Playlist
         if isinstance(result, lavaplayer.PlayList):
             await lavalink.add_to_queue(ctx.guild_id, result.tracks, ctx.author.id)
-            # await ctx.respond(f"Added {len(result.tracks)} tracks to queue", delete_after=10)
             await ctx.respond(embed=hikari.Embed(title="Playlist Added", description=f"Playlist added to queue",
                                  color=0x6100FF))
             await msgUpdate(ctx.guild_id)
@@ -307,7 +252,6 @@ async def play_command(ctx: lightbulb.context.Context):
 
         await lavalink.play(ctx.guild_id, result[0], ctx.author.id)  # play the first result
         await ctx.respond(embed=hikari.Embed(title='Song Added', description=f" [{result[0].title}]({result[0].uri}) by {result[0].author}"), delete_after=10)  # send the embed
-        # await ctx.respond(content='Testing for now')
         # endregion
 
         await msgUpdate(ctx.guild_id)
@@ -345,8 +289,6 @@ async def queue_command(ctx: lightbulb.context.Context):
                     break
         embed = hikari.Embed(title='Queue - Next 10',
                              description=embedDescription
-                             # description="\n".join(
-                             #     [f"{n + 1}- [{i.title}]({i.uri}) requested by: {hikari.Guild.get_member(ctx.get_guild(), int(i.requester)).mention}" for n, i in enumerate(node.queue)])
                              )
         await ctx.respond(embed=embed, flags=hikari.MessageFlag.EPHEMERAL)
     else:
@@ -492,32 +434,11 @@ async def shuffle_command(ctx: lightbulb.context.Context):
 # endregion
 
 
-# Change Volume (Disabled)
-# region VOLUME COMMAND
-# @musicPL.command()
-# @lightbulb.option(name="vol", description="Volume to set", required=True, min_value=1, max_value=500, type=int)
-# @lightbulb.command(name="volume", description="Volume command", ephemeral=True)
-# @lightbulb.implements(lightbulb.SlashCommand)
-# async def volume_command(ctx: lightbulb.context.Context):
-#     inVC = ctx.bot.cache.get_voice_state(ctx.guild_id, musicPL.bot.get_me())
-#
-#     if inVC is not None:
-#         volume = ctx.options.vol
-#         await lavalink.volume(ctx.guild_id, volume)
-#         await ctx.respond(f"done set volume to {volume}%")
-#     else:
-#         await ctx.respond(content='Bot not in a VC', flags=hikari.MessageFlag.EPHEMERAL)
-# endregion
-
-
 # On voice state update the bot will update the lavalink node for the Guild
 # and disconnect if no people in the VC
 # region UPDATE NODE FOR GUILD
 @musicPL.listener(hikari.VoiceStateUpdateEvent)
 async def voice_state_update(event: hikari.VoiceStateUpdateEvent):
-    # await lavalink.raw_voice_state_update(event.guild_id, event.state.user_id, event.state.session_id,
-    #                                       event.state.channel_id)
-
     # check if bot in VC
     if not musicPL.bot.cache.get_voice_state(event.guild_id, musicPL.bot.get_me().id):
         # print('working')
